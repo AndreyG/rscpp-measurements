@@ -12,7 +12,7 @@ commits = []
 
 def process_build(build):
     build_dir = os.path.join(input_dir, build)
-    for t in os.listdir(build_dir):
+    for t in sorted(os.listdir(build_dir)):
         path = os.path.join(build_dir, t)
         if t == "rs-commit-id.txt":
             with open(path, 'r') as f:
@@ -20,7 +20,7 @@ def process_build(build):
 
             continue
 
-        for config in os.listdir(path):
+        for config in sorted(os.listdir(path)):
             project = config.removesuffix('.toml')
             if not project in projects:
                 projects[project] = {}
