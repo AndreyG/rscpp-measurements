@@ -46,7 +46,7 @@ def generate(projects):
     generated_canvases = ""
     generated_script = ""
     for project_name, data in projects.items():
-        generated_canvases += f"<h1 class=\"report-title\">{project_name}</h1>\n"
+        generated_canvases += f"<h1 class=\"report-title\" id=\"{project_name}\"><a href=\"#{project_name}\">{project_name}</a></h1>\n"
         generated_canvases += "<div class=\"report-graphs\">\n"
         for t, results in data.items():
             canvas_id = f"{project_name}.{t}"
