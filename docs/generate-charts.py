@@ -1,6 +1,7 @@
 import os
 import sys
 import toml
+from signal_processing_algorithms.energy_statistics import energy_statistics
 
 assert len(sys.argv) == 3
 input_dir = sys.argv[1]
@@ -55,6 +56,9 @@ def generate(projects):
             for build, time in results:
                 builds.append(build)
                 times.append(time)
+
+            change_points = sorted(energy_statistics.e_divisive(times, pvalue=0.01, permutations=100))
+
             generated_canvases += f"<canvas id=\"{canvas_id}\" style=\"width:100%;max-width:1000px\"></canvas>\n"
             generated_script += "new Chart(\"" + canvas_id + "\", {\n"
 
@@ -108,11 +112,14 @@ def generate(projects):
             max_value = max(times)
             range = max_value - min_value
             delta = range / 5.
-            generated_script += f"ticks: {{min: {min_value - delta}, max: {max_value + delta}}}"
+            generated_script += f"ticks: {{min: {min_value - delta}, max: {max_value + delta}}}\n"
             generated_script += """
         }],
     }
-  }
+  },
+"""
+            generated_script += f"lineAtIndex: {change_points}"
+            generated_script += """
 });
 """    
         generated_canvases += "</div>\n\n"
@@ -150,7 +157,37 @@ epilog = """
 </html>
 """
 
-html = prolog + generated_canvases + "<script>\n" + "const commit = " + str(commits) + ";\n" + generated_script + "\n</script>" + epilog
+verticalLinePlugin = """
+const verticalLinePlugin = {
+  getLinePosition: function (chart, pointIndex) {
+      const meta = chart.getDatasetMeta(0); // first dataset is used to discover X coordinate of a point
+      const data = meta.data;
+      return data[pointIndex]._model.x;
+  },
+  renderVerticalLine: function (chartInstance, pointIndex) {
+      const lineLeftOffset = 0.5 * (this.getLinePosition(chartInstance, pointIndex - 1) + this.getLinePosition(chartInstance, pointIndex));
+      const scale = chartInstance.scales['y-axis-0'];
+      const context = chartInstance.chart.ctx;
+
+      // render vertical line
+      context.beginPath();
+      context.strokeStyle = '#ff0000';
+      context.moveTo(lineLeftOffset, scale.top);
+      context.lineTo(lineLeftOffset, scale.bottom);
+      context.stroke();
+  },
+
+  afterDatasetsDraw: function (chart, easing) {
+      if (chart.config.lineAtIndex) {
+          chart.config.lineAtIndex.forEach(pointIndex => this.renderVerticalLine(chart, pointIndex));
+      }
+  }
+};
+
+Chart.plugins.register(verticalLinePlugin);
+"""
+
+html = prolog + generated_canvases + "<script>\n" + verticalLinePlugin + "\nconst commit = " + str(commits) + ";\n" + generated_script + "\n</script>" + epilog
 
 with open(output, 'w') as f:
     f.write(html)
