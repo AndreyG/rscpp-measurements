@@ -1,6 +1,7 @@
 import os
 import sys
 import toml
+import json
 from signal_processing_algorithms.energy_statistics import energy_statistics
 
 assert len(sys.argv) == 2
@@ -69,11 +70,25 @@ def generate(projects, t):
         range = max_value - min_value
         delta = range / 5.
 
-        labels = project_name.replace('-', '_') + "Labels"
-        data = project_name.replace('-', '_') + "Data"
-        generated_script += f"const {labels} = {str(builds)};\n\n"
-        generated_script += f"const {data} = {str(times)};\n\n"
-        generated_script += f"generate_chart(\"{canvas_id}\", {labels}, {data}, {{min: {min_value - delta}, max: {max_value + delta}}}, {change_points});\n\n\n"
+        data = {
+            'labels': builds,
+            'times': times,
+            'change_points': change_points,
+            'ticks': {
+                'min': min_value - delta,
+                'max': max_value + delta
+            }
+        }
+
+        project_name = project_name.replace('-', '_')
+
+        with open(f"./{t}/{project_name}.json", 'w') as f:
+            json.dump(data, f, indent=4)
+
+        generated_script += f"{project_name} = fetch(\"./{t}/{project_name}.json\").then((response) => response.json());\n"
+        generated_script += f"{project_name}.then((data) => {{\n"
+        generated_script += f"  generate_chart(\"{canvas_id}\", data);\n"
+        generated_script += f"}});\n\n"
 
     return (generated_canvases, generated_script)
 
@@ -136,17 +151,17 @@ Chart.plugins.register(verticalLinePlugin);
 """
 
 generate_chart_js_function = """
-function generate_chart(name, labels, data, ticks, change_points) {
+function generate_chart(name, data) {
     new Chart(name, {
       type: "line",
       data: {
-        labels: labels,
+        labels: data['labels'],
         datasets: [{
           fill: false,
           lineTension: 0,
           backgroundColor: "rgba(0,0,255,1)",
           borderColor: "rgba(0,0,0,0)",
-          data: data
+          data: data['times']
         }]
       },
       options: {
@@ -172,11 +187,11 @@ function generate_chart(name, labels, data, ticks, change_points) {
                 display: true,
                 labelString: 'seconds'
               },
-              ticks: ticks
+              ticks: data['ticks']
             }],
         }
       },
-      lineAtIndex: change_points
+      lineAtIndex: data['change_points']
     }
   );
 }
@@ -194,6 +209,6 @@ for t in ["indexing", "inspect-code"]:
     with open(t + ".js", 'w') as f:
         f.write(verticalLinePlugin)
         f.write("\nconst commit = " + str(commits) + ";\n\n")
-        f.write(generate_chart_js_function)
+        f.write(generate_chart_js_function + "\n\n")
         f.write(generated_script)
 
