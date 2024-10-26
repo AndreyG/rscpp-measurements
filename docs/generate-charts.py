@@ -102,6 +102,7 @@ with open('template.js', 'r') as f:
     js_template = f.read()
 
 for t in ["indexing", "inspect-code"]:
+    os.makedirs(t)
     generated_canvases, generated_script = generate(projects, t)
 
     with open(t + ".html", 'w') as f:
