@@ -190,7 +190,7 @@ new Chart("Catch2.chart", {
         }],
     }
   },
-  lineAtIndex: [8, 31, 38, 56]
+  lineAtIndex: [31, 38, 56]
 });
 new Chart("GLM.chart", {
   type: "line",
@@ -354,7 +354,7 @@ new Chart("IfcReader.chart", {
         }],
     }
   },
-  lineAtIndex: [33]
+  lineAtIndex: [33, 48]
 });
 new Chart("LLVM.chart", {
   type: "line",
@@ -395,7 +395,7 @@ new Chart("LLVM.chart", {
         }],
     }
   },
-  lineAtIndex: [41, 51, 54, 64]
+  lineAtIndex: [41, 54]
 });
 new Chart("Range-V3.chart", {
   type: "line",
@@ -723,7 +723,7 @@ new Chart("UnrealEngine.chart", {
         }],
     }
   },
-  lineAtIndex: [41, 54, 64]
+  lineAtIndex: [41, 54]
 });
 new Chart("VTK.chart", {
   type: "line",
@@ -846,7 +846,7 @@ new Chart("fmtlib.chart", {
         }],
     }
   },
-  lineAtIndex: [9, 32, 40, 54]
+  lineAtIndex: [9, 40, 54]
 });
 new Chart("glslang.chart", {
   type: "line",
@@ -1051,7 +1051,7 @@ new Chart("xgboost.chart", {
         }],
     }
   },
-  lineAtIndex: [30, 41]
+  lineAtIndex: [41]
 });
 new Chart("rpp.chart", {
   type: "line",

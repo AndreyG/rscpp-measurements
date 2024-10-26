@@ -559,7 +559,7 @@ new Chart("RigelEngine.chart", {
         }],
     }
   },
-  lineAtIndex: [24, 31, 44]
+  lineAtIndex: [31, 44]
 });
 new Chart("SEAL.chart", {
   type: "line",
