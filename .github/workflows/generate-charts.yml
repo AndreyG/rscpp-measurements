@@ -11,12 +11,14 @@ jobs:
     
     defaults:
       run:
-        working-directory: ./docs
+        working-directory: ./scripts
 
     steps:
       
       - name: checkout repo content
         uses: actions/checkout@v4 # checkout the repository content to github runner
+        with:
+          fetch-depth: '0'
 
       - name: setup python
         uses: actions/setup-python@v2
@@ -31,14 +33,27 @@ jobs:
       - name: execute py script
         run: python generate-charts.py ..
 
+      - name: switch branches
+        run: git checkout charts
+
+      - name: move generated files
+        run: |
+          mv indexing.html     indexing.js     ..
+          mv inspect-code.html inspect-code.js ..
+          mkdir -p ../indexing
+          mkdir -p ../inspect-code
+          mv indexing/*                        ../indexing
+          mv inspect-code/*                    ../inspect-code
+
       - name: commit files
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          git add ..
           git commit -am "update charts"
           
       - name: push changes
         uses: ad-m/github-push-action@v0.6.0
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: master
+          branch: charts

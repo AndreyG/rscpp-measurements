@@ -38,7 +38,7 @@ def process_build(build):
 
 
 for build in sorted(os.listdir(input_dir)):
-    if build == ".git" or build == ".github" or build == "docs":
+    if build == ".git" or build == ".github" or build == "scripts":
         continue
 
     process_build(build)
