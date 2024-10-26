@@ -3,9 +3,8 @@ import sys
 import toml
 from signal_processing_algorithms.energy_statistics import energy_statistics
 
-assert len(sys.argv) == 3
+assert len(sys.argv) == 2
 input_dir = sys.argv[1]
-output = sys.argv[2]
 
 projects = {}
 commits = []
@@ -43,49 +42,47 @@ for build in sorted(os.listdir(input_dir)):
     process_build(build)
 
 
-def generate(projects):
+def generate(projects, t):
     generated_canvases = ""
     generated_script = ""
     for project_name, data in projects.items():
-        generated_canvases += f"<h1 class=\"report-title\" id=\"{project_name}\"><a href=\"#{project_name}\">{project_name}</a></h1>\n"
+        if not t in data:
+            continue
+
+        results = data[t]
+        canvas_id = project_name + ".chart"
+
+        generated_canvases += f"<h1 class=\"report-title\" id={project_name}><a href=\"#{project_name}\">{project_name}</a></h1>\n"
         generated_canvases += "<div class=\"report-graphs\">\n"
-        for t, results in data.items():
-            canvas_id = f"{project_name}.{t}"
-            builds = []
-            times = []
-            for build, time in results:
-                builds.append(build)
-                times.append(time)
+        generated_canvases += f"<canvas id=\"{canvas_id}\" style=\"width:100%;max-width:1500px\"/>\n"
 
-            change_points = sorted(energy_statistics.e_divisive(times, pvalue=0.01, permutations=100))
+        builds = []
+        times = []
+        for build, time in results:
+            builds.append(build)
+            times.append(time)
 
-            generated_canvases += f"<canvas id=\"{canvas_id}\" style=\"width:100%;max-width:1000px\"></canvas>\n"
-            generated_script += "new Chart(\"" + canvas_id + "\", {\n"
+        change_points = sorted(energy_statistics.e_divisive(times, pvalue=0.01, permutations=100))
 
-            generated_script += """
+        generated_script += "new Chart(\"" + canvas_id + "\", {"
+        generated_script += """
   type: "line",
   data: {
 """
-            generated_script += "labels: " + str(builds) + ",\n"
-            generated_script += """
+        generated_script += "    labels: " + str(builds) + ","
+        generated_script += """
     datasets: [{
       fill: false,
       lineTension: 0,
       backgroundColor: "rgba(0,0,255,1)",
       borderColor: "rgba(0,0,0,0)",
 """
-            generated_script += f"data: {times}\n"
-            generated_script += """
+        generated_script += f"      data: {times}"
+        generated_script += """
     }]
   },
   options: {
     legend: {display: false},
-    title: {
-      display: true,
-"""
-            generated_script += f"text: \"{t}\"\n"
-            generated_script += """
-    },
     tooltips: {
       callbacks: {
         title: function(tooltipItem, data) {
@@ -108,28 +105,26 @@ def generate(projects):
             labelString: 'seconds'
           },
 """
-            min_value = min(times)
-            max_value = max(times)
-            range = max_value - min_value
-            delta = range / 5.
-            generated_script += f"ticks: {{min: {min_value - delta}, max: {max_value + delta}}}\n"
-            generated_script += """
+        min_value = min(times)
+        max_value = max(times)
+        range = max_value - min_value
+        delta = range / 5.
+        generated_script += f"          ticks: {{min: {min_value - delta}, max: {max_value + delta}}}"
+        generated_script += """
         }],
     }
   },
 """
-            generated_script += f"lineAtIndex: {change_points}"
-            generated_script += """
+        generated_script += f"  lineAtIndex: {change_points}"
+        generated_script += """
 });
 """    
         generated_canvases += "</div>\n\n"
 
     return (generated_canvases, generated_script)
 
-generated_canvases, generated_script = generate(projects)
+prolog = """<!DOCTYPE html>
 
-prolog = """
-<!DOCTYPE html>
 <html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
 <body>
@@ -187,7 +182,9 @@ const verticalLinePlugin = {
 Chart.plugins.register(verticalLinePlugin);
 """
 
-html = prolog + generated_canvases + "<script>\n" + verticalLinePlugin + "\nconst commit = " + str(commits) + ";\n" + generated_script + "\n</script>" + epilog
+for t in ["indexing", "inspect-code"]:
+    generated_canvases, generated_script = generate(projects, t)
+    html = prolog + generated_canvases + "<script>\n" + verticalLinePlugin + "\nconst commit = " + str(commits) + ";\n\n" + generated_script + "\n</script>" + epilog
 
-with open(output, 'w') as f:
-    f.write(html)
+    with open(t + ".html", 'w') as f:
+        f.write(html)

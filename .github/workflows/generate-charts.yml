@@ -29,14 +29,13 @@ jobs:
           pip install -r requirements.txt
 
       - name: execute py script
-        run: python generate-charts.py .. index.html
+        run: python generate-charts.py ..
 
       - name: commit files
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add index.html
-          git commit -m "update charts"
+          git commit -am "update charts"
           
       - name: push changes
         uses: ad-m/github-push-action@v0.6.0
