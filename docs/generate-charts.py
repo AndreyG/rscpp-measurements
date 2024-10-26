@@ -3,6 +3,7 @@ import sys
 import toml
 import json
 from signal_processing_algorithms.energy_statistics import energy_statistics
+from signal_processing_algorithms.determinism import deterministic_numpy_random
 
 assert len(sys.argv) == 2
 input_dir = sys.argv[1]
@@ -63,7 +64,8 @@ def generate(projects, t):
             builds.append(build)
             times.append(time)
 
-        change_points = sorted(energy_statistics.e_divisive(times, pvalue=0.01, permutations=100))
+        with deterministic_numpy_random(31415):
+            change_points = sorted(energy_statistics.e_divisive(times, pvalue=0.01, permutations=100))
 
         min_value = min(times)
         max_value = max(times)
