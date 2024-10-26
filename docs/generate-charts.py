@@ -41,7 +41,6 @@ for build in sorted(os.listdir(input_dir)):
 
     process_build(build)
 
-
 def generate(projects, t):
     generated_canvases = ""
     generated_script = ""
@@ -55,6 +54,7 @@ def generate(projects, t):
         generated_canvases += f"<h1 class=\"report-title\" id={project_name}><a href=\"#{project_name}\">{project_name}</a></h1>\n"
         generated_canvases += "<div class=\"report-graphs\">\n"
         generated_canvases += f"<canvas id=\"{canvas_id}\" style=\"width:100%;max-width:1500px\"/>\n"
+        generated_canvases += "</div>\n\n"
 
         builds = []
         times = []
@@ -64,62 +64,16 @@ def generate(projects, t):
 
         change_points = sorted(energy_statistics.e_divisive(times, pvalue=0.01, permutations=100))
 
-        generated_script += "new Chart(\"" + canvas_id + "\", {"
-        generated_script += """
-  type: "line",
-  data: {
-"""
-        generated_script += "    labels: " + str(builds) + ","
-        generated_script += """
-    datasets: [{
-      fill: false,
-      lineTension: 0,
-      backgroundColor: "rgba(0,0,255,1)",
-      borderColor: "rgba(0,0,0,0)",
-"""
-        generated_script += f"      data: {times}"
-        generated_script += """
-    }]
-  },
-  options: {
-    legend: {display: false},
-    tooltips: {
-      callbacks: {
-        title: function(tooltipItem, data) {
-          index = tooltipItem[0]['index']
-          build = data['labels'][index]
-          return "TC build: " + build + "\\n" + "commit: " + commit[index];
-        }
-      }
-    },
-    scales: {
-        xAxes: [{
-          scaleLabel: {
-            display: true,
-            labelString: 'TC build'
-          }
-        }],
-        yAxes: [{
-          scaleLabel: {
-            display: true,
-            labelString: 'seconds'
-          },
-"""
         min_value = min(times)
         max_value = max(times)
         range = max_value - min_value
         delta = range / 5.
-        generated_script += f"          ticks: {{min: {min_value - delta}, max: {max_value + delta}}}"
-        generated_script += """
-        }],
-    }
-  },
-"""
-        generated_script += f"  lineAtIndex: {change_points}"
-        generated_script += """
-});
-"""    
-        generated_canvases += "</div>\n\n"
+
+        labels = project_name.replace('-', '_') + "Labels"
+        data = project_name.replace('-', '_') + "Data"
+        generated_script += f"const {labels} = {str(builds)};\n\n"
+        generated_script += f"const {data} = {str(times)};\n\n"
+        generated_script += f"generate_chart(\"{canvas_id}\", {labels}, {data}, {{min: {min_value - delta}, max: {max_value + delta}}}, {change_points});\n\n\n"
 
     return (generated_canvases, generated_script)
 
@@ -181,6 +135,53 @@ verticalLinePlugin = """const verticalLinePlugin = {
 Chart.plugins.register(verticalLinePlugin);
 """
 
+generate_chart_js_function = """
+function generate_chart(name, labels, data, ticks, change_points) {
+    new Chart(name, {
+      type: "line",
+      data: {
+        labels: labels,
+        datasets: [{
+          fill: false,
+          lineTension: 0,
+          backgroundColor: "rgba(0,0,255,1)",
+          borderColor: "rgba(0,0,0,0)",
+          data: data
+        }]
+      },
+      options: {
+        legend: {display: false},
+        tooltips: {
+          callbacks: {
+            title: function(tooltipItem, data) {
+              index = tooltipItem[0]['index']
+              build = data['labels'][index]
+              return "TC build: " + build + "\\n" + "commit: " + commit[index];
+            }
+          }
+        },
+        scales: {
+            xAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'TC build'
+              }
+            }],
+            yAxes: [{
+              scaleLabel: {
+                display: true,
+                labelString: 'seconds'
+              },
+              ticks: ticks
+            }],
+        }
+      },
+      lineAtIndex: change_points
+    }
+  );
+}
+"""
+
 for t in ["indexing", "inspect-code"]:
     generated_canvases, generated_script = generate(projects, t)
 
@@ -193,5 +194,6 @@ for t in ["indexing", "inspect-code"]:
     with open(t + ".js", 'w') as f:
         f.write(verticalLinePlugin)
         f.write("\nconst commit = " + str(commits) + ";\n\n")
+        f.write(generate_chart_js_function)
         f.write(generated_script)
 
