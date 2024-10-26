@@ -152,8 +152,7 @@ epilog = """
 </html>
 """
 
-verticalLinePlugin = """
-const verticalLinePlugin = {
+verticalLinePlugin = """const verticalLinePlugin = {
   getLinePosition: function (chart, pointIndex) {
       const meta = chart.getDatasetMeta(0); // first dataset is used to discover X coordinate of a point
       const data = meta.data;
@@ -184,7 +183,15 @@ Chart.plugins.register(verticalLinePlugin);
 
 for t in ["indexing", "inspect-code"]:
     generated_canvases, generated_script = generate(projects, t)
-    html = prolog + generated_canvases + "<script>\n" + verticalLinePlugin + "\nconst commit = " + str(commits) + ";\n\n" + generated_script + "\n</script>" + epilog
 
     with open(t + ".html", 'w') as f:
-        f.write(html)
+        f.write(prolog)
+        f.write(generated_canvases)
+        f.write(f"<script src=\"{t}.js\"></script>\n")
+        f.write(epilog)
+
+    with open(t + ".js", 'w') as f:
+        f.write(verticalLinePlugin)
+        f.write("\nconst commit = " + str(commits) + ";\n\n")
+        f.write(generated_script)
+
