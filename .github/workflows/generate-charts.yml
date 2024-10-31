@@ -31,7 +31,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: execute py script
-        run: python generate-charts.py ..
+        run: python generate-charts.py .. "${{secrets.EMAIL}}" "${{secrets.GMAIL_AUTH_TOKEN}}"
 
       - name: switch branches
         run: git checkout charts
