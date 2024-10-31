@@ -46,7 +46,7 @@ function generate_chart(name, data) {
             title: function(tooltipItem, data) {
               index = tooltipItem[0]['index']
               build = data['labels'][index]
-              return "TC build: " + build + "\n" + "commit: " + commit[index];
+              return "TC build: " + build + "\n" + "commit: " + commit[build];
             }
           }
         },

@@ -9,7 +9,7 @@ assert len(sys.argv) == 2
 input_dir = sys.argv[1]
 
 projects = {}
-commits = []
+commits = {}
 
 def process_build(build):
     build_dir = os.path.join(input_dir, build)
@@ -17,7 +17,7 @@ def process_build(build):
         path = os.path.join(build_dir, t)
         if t == "rs-commit-id.txt":
             with open(path, 'r') as f:
-                commits.append(f.read())
+                commits[build] = f.read()
 
             continue
 
