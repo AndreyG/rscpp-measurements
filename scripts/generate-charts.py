@@ -2,10 +2,12 @@ import os
 import sys
 import toml
 import json
+import smtplib
+from email.mime.text import MIMEText
 from signal_processing_algorithms.energy_statistics import energy_statistics
 from signal_processing_algorithms.determinism import deterministic_numpy_random
 
-assert len(sys.argv) == 2
+assert len(sys.argv) == 4
 input_dir = sys.argv[1]
 
 projects = {}
@@ -43,6 +45,12 @@ for build in sorted(os.listdir(input_dir)):
 
     process_build(build)
 
+
+def find_change_points(times):
+    with deterministic_numpy_random(31415):
+        return sorted(energy_statistics.e_divisive(times, pvalue=0.01, permutations=100))
+
+
 def generate(projects, t):
     generated_canvases = ""
     generated_script = ""
@@ -64,8 +72,7 @@ def generate(projects, t):
             builds.append(build)
             times.append(time)
 
-        with deterministic_numpy_random(31415):
-            change_points = sorted(energy_statistics.e_divisive(times, pvalue=0.01, permutations=100))
+        change_points = find_change_points(times)
 
         min_value = min(times)
         max_value = max(times)
@@ -112,4 +119,72 @@ for t in ["indexing", "inspect-code"]:
         f.write(js_template)
         f.write("\nconst commit = " + str(commits) + ";\n\n")
         f.write(generated_script)
+
+
+regression = 'regression'
+speedup = 'speedup'
+
+def generate_report():
+    report = {regression: [], speedup: []}
+
+    for project_name, data in projects.items():
+        for t, measurements in data.items():
+            builds = []
+            times = []
+            for build, time in measurements:
+                builds.append(build)
+                times.append(time)
+
+            curr_change_points = find_change_points(times)
+            prev_change_points = find_change_points(times[:-1])
+
+            if len(curr_change_points) > len(prev_change_points) \
+                    and set(prev_change_points).issubset(set(curr_change_points)) \
+                    and not curr_change_points[len(curr_change_points) - 1] in prev_change_points:
+                build_id = curr_change_points[len(curr_change_points)-1]
+
+                kind = regression if times[build_id] > times[build_id - 1] else speedup
+                report[kind].append((project_name, t, build_id))
+
+    return report
+
+
+report = generate_report()
+
+
+def generate_message_body():
+    result = None
+    for kind in [regression, speedup]:
+        changes = report[kind]
+        if not changes:
+            continue
+
+        if result:
+            result += "\n"
+        else:
+            result = ""
+
+        result += "The following projects contain " + kind + ":\n"
+        for project_name, t, build_id in changes:
+            measurements = projects[project_name][t]
+            builds = []
+            for build, time in measurements:
+                builds.append(build)
+
+            result += f"  {project_name} in build {builds[build_id]}\n"
+            result += f"  commit sequence: {commits[builds[build_id - 1]]}..{commits[builds[build_id]]}\n"
+            result += f"  see https://andreyg.github.io/rscpp-measurements/{t}.html#{project_name}\n\n"
+
+    return result
+
+if report[regression] or report[speedup]:
+    email = sys.argv[2]
+    password = sys.argv[3]
+    msg = MIMEText(generate_message_body())
+    msg['Subject'] = "Performance Report from GH Action"
+    msg['From'] = email
+    msg['To'] = email
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        smtp_server.login(email, password)
+        smtp_server.sendmail(email, email, msg.as_string())
 
