@@ -34,9 +34,15 @@ def process_build(build):
             
             with open(os.path.join(path, config), 'r') as f:
                 config = toml.load(f)
-                time = config['best-result']
+                time = config['all-measurements']
+                time.append(config['warmup-time'])
+                best = config['best-result']
 
-            projects[project][t].append((build, time))                
+            for m in time:
+                if (m - best) / best > 0.01:
+                    continue
+
+                projects[project][t].append((build, m))
 
 
 for build in sorted(os.listdir(input_dir)):
@@ -46,9 +52,23 @@ for build in sorted(os.listdir(input_dir)):
     process_build(build)
 
 
-def find_change_points(times):
+def find_change_points(times, builds):
     with deterministic_numpy_random(31415):
-        return sorted(energy_statistics.e_divisive(times, pvalue=0.01, permutations=100))
+        stat_results = sorted(energy_statistics.e_divisive(times, pvalue=0.1, permutations=100))
+
+    filtered = []
+    for cp in stat_results:
+        if builds[cp] == builds[cp - 1]:
+            continue # ignore "change points" from the same build
+
+        before = times[cp - 1]
+        after = times[cp]
+        if abs(before - after) / min(before, after) < 0.01:
+            continue # ignore "change points" when the value changed less than 1%
+
+        filtered.append(cp)
+
+    return filtered
 
 
 def generate(projects, t):
@@ -72,7 +92,7 @@ def generate(projects, t):
             builds.append(build)
             times.append(time)
 
-        change_points = find_change_points(times)
+        change_points = find_change_points(times, builds)
 
         min_value = min(times)
         max_value = max(times)
@@ -135,8 +155,8 @@ def generate_report():
                 builds.append(build)
                 times.append(time)
 
-            curr_change_points = find_change_points(times)
-            prev_change_points = find_change_points(times[:-1])
+            curr_change_points = find_change_points(times, builds)
+            prev_change_points = find_change_points(times[:-1], builds[:-1])
 
             if len(curr_change_points) > len(prev_change_points) \
                     and set(prev_change_points).issubset(set(curr_change_points)) \
