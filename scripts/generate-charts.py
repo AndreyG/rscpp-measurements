@@ -53,6 +53,9 @@ for build in sorted(os.listdir(input_dir)):
 
 
 def find_change_points(times, builds):
+    if len(times) < 3:
+        return []
+        
     with deterministic_numpy_random(31415):
         stat_results = sorted(energy_statistics.e_divisive(times, pvalue=0.1, permutations=100))
 
