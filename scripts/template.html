@@ -2,7 +2,7 @@
 
 <html>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
-<body>
+<body onload = "prefill()">
 
 <style>
   .report-title {
@@ -20,6 +20,27 @@
     width: 100%;
   }
 </style>
+
+<div>
+<input type="checkbox" id="yscale" value="yscale" onclick="onClick()" />
+<label for="yscale">Scale time from zero</label>
+</div>
+
+<script>
+const fromZero = 'fromZero';
+
+function onClick() {
+  var checkBox = document.getElementById('yscale');
+  window.location.replace(window.location.origin + window.location.pathname + '?yscale=' + (checkBox.checked ? fromZero : 'centered'))
+}
+
+function prefill() {
+  var checkBox = document.getElementById('yscale');
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  checkBox.checked = urlParams.get('yscale') == fromZero;
+}
+</script>
 
 PLACE YOUR SHIT HERE
 

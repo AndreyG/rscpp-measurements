@@ -27,6 +27,8 @@ const verticalLinePlugin = {
 Chart.plugins.register(verticalLinePlugin);
 
 function generate_chart(name, data) {
+    var checkBox = document.getElementById("yscale");
+    ticks = checkBox.checked ? { 'beginAtZero': true } : data['ticks'];
     new Chart(name, {
       type: "line",
       data: {
@@ -62,7 +64,7 @@ function generate_chart(name, data) {
                 display: true,
                 labelString: 'seconds'
               },
-              ticks: data['ticks']
+              ticks: ticks
             }],
         }
       },
