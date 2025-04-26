@@ -31,7 +31,7 @@ const fromZero = 'fromZero';
 
 function onClick() {
   var checkBox = document.getElementById('yscale');
-  window.location.replace(window.location.origin + window.location.pathname + window.location.hash + '?yscale=' + (checkBox.checked ? fromZero : 'centered'))
+  window.location.replace(window.location.origin + window.location.pathname + '?yscale=' + (checkBox.checked ? fromZero : 'centered') + window.location.hash)
 }
 
 function prefill() {
