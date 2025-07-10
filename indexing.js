@@ -29,7 +29,7 @@ Chart.plugins.register(verticalLinePlugin);
 function generate_chart(name, data) {
     var checkBox = document.getElementById("yscale");
     ticks = checkBox.checked ? { 'beginAtZero': true } : data['ticks'];
-    new Chart(name, {
+    const chart = new Chart(name, {
       type: "line",
       data: {
         labels: data['labels'],
