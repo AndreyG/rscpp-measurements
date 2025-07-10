@@ -29,7 +29,7 @@ Chart.plugins.register(verticalLinePlugin);
 function generate_chart(name, data) {
     var checkBox = document.getElementById("yscale");
     ticks = checkBox.checked ? { 'beginAtZero': true } : data['ticks'];
-    new Chart(name, {
+    const chart = new Chart(name, {
       type: "line",
       data: {
         labels: data['labels'],
@@ -43,6 +43,17 @@ function generate_chart(name, data) {
       },
       options: {
         legend: {display: false},
+        interaction: {
+          mode: 'nearest',
+        },            
+        onClick: (e) => {
+          const canvasPosition = Chart.helpers.getRelativePosition(e, chart);
+          const index = chart.scales['x-axis-0'].getValueForPixel(canvasPosition.x);
+          build = data['labels'][index]
+          var text = "TC build: " + build + "\n" + "commit: " + commit[build];
+          console.log(text);
+          navigator.clipboard.writeText(text);
+        },        
         tooltips: {
           callbacks: {
             title: function(tooltipItem, data) {
