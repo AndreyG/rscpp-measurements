@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+
+<html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<body onload = "prefill()">
+
+<style>
+  .report-title {
+    font-size: 3rem;
+    font-weight: 600;
+    word-break: break-word;
+    text-align: center;
+  }
+  .report-graphs {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+</style>
+
+<div style="position:fixed">
+<input type="checkbox" id="yscale" value="yscale" onclick="onClick()" />
+<label for="yscale">Scale time from zero</label>
+</div>
+
+<script>
+const fromZero = 'fromZero';
+
+function onClick() {
+  var checkBox = document.getElementById('yscale');
+  window.location.replace(window.location.origin + window.location.pathname + '?yscale=' + (checkBox.checked ? fromZero : 'centered') + window.location.hash)
+}
+
+function prefill() {
+  var checkBox = document.getElementById('yscale');
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  var yscale = urlParams.get('yscale')
+  checkBox.checked = yscale == null || yscale == fromZero;
+}
+</script>
+
+<h1 class="report-title" id=xgboost><a href="#xgboost">xgboost</a></h1>
+<div class="report-graphs">
+<canvas id="xgboost.chart" style="width:100%;max-width:1500px"/>
+</div>
+<script src="..\inspect-code.js"></script>
+
+</body>
+</html>
