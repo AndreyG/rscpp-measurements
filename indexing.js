@@ -132,8 +132,8 @@ LLVM.then((data) => {
   generate_chart("LLVM.chart", data);
 });
 
-Range-V3 = fetch("./indexing/Range-V3.json").then((response) => response.json());
-Range-V3.then((data) => {
+Range_V3 = fetch("./indexing/Range-V3.json").then((response) => response.json());
+Range_V3.then((data) => {
   generate_chart("Range-V3.chart", data);
 });
 
@@ -177,8 +177,8 @@ VTK.then((data) => {
   generate_chart("VTK.chart", data);
 });
 
-baseline-project = fetch("./indexing/baseline-project.json").then((response) => response.json());
-baseline-project.then((data) => {
+baseline_project = fetch("./indexing/baseline-project.json").then((response) => response.json());
+baseline_project.then((data) => {
   generate_chart("baseline-project.chart", data);
 });
 
@@ -237,8 +237,8 @@ PhantomCoroutines.then((data) => {
   generate_chart("PhantomCoroutines.chart", data);
 });
 
-nlohmann-json = fetch("./indexing/nlohmann-json.json").then((response) => response.json());
-nlohmann-json.then((data) => {
+nlohmann_json = fetch("./indexing/nlohmann-json.json").then((response) => response.json());
+nlohmann_json.then((data) => {
   generate_chart("nlohmann-json.chart", data);
 });
 
