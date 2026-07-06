@@ -38,7 +38,8 @@ function prefill() {
   var checkBox = document.getElementById('yscale');
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  checkBox.checked = urlParams.get('yscale') == fromZero;
+  var yscale = urlParams.get('yscale')
+  checkBox.checked = yscale == null || yscale == fromZero;
 }
 </script>
 
