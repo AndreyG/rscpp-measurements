@@ -216,7 +216,7 @@ def generate_message_body():
 
             result += f"  {project_name} in build {builds[build_id]}\n"
             result += f"  commit sequence: {commits[builds[build_id - 1]]}..{commits[builds[build_id]]}\n"
-            result += f"  see https://andreyg.github.io/rscpp-measurements/{t}.html#{project_name}\n\n"
+            result += f"  see https://andreyg.github.io/rscpp-measurements/{t}/{project_name}.html\n\n"
 
     return result
 
