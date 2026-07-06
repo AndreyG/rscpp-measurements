@@ -74,6 +74,13 @@ def find_change_points(times, builds):
     return filtered
 
 
+with open('template.html', 'r') as f:
+    html_template = f.read()
+
+with open('template.js', 'r') as f:
+    js_template = f.read()
+
+
 def generate(projects, t):
     generated_canvases = ""
     generated_script = ""
@@ -84,10 +91,16 @@ def generate(projects, t):
         results = data[t]
         canvas_id = project_name + ".chart"
 
+        generated_canvas = "<div class=\"report-graphs\">\n"
+        generated_canvas += f"<canvas id=\"{canvas_id}\" style=\"width:100%;max-width:1500px\"/>\n"
+        generated_canvas += "</div>\n"
+
         generated_canvases += f"<h1 class=\"report-title\" id={project_name}><a href=\"#{project_name}\">{project_name}</a></h1>\n"
-        generated_canvases += "<div class=\"report-graphs\">\n"
-        generated_canvases += f"<canvas id=\"{canvas_id}\" style=\"width:100%;max-width:1500px\"/>\n"
-        generated_canvases += "</div>\n\n"
+        generated_canvases += generated_canvas + "\n"
+        generated_canvases += f"<a href=\"{t}/{project_name}.html\">Open in separate page</a>\n"
+
+        generated_canvas = f"<h1 class=\"report-title\">{project_name}</h1>\n" + generated_canvas + "\n"
+        generated_canvas += f"<a href=\"../{t}.html#{project_name}\">Open in all-projects view page</a>\n"
 
         builds = []
         times = []
@@ -112,24 +125,31 @@ def generate(projects, t):
             }
         }
 
-        project_name = project_name.replace('-', '_')
+        var_name = project_name.replace('-', '_')
+
+        local_script = ""
+        local_script = f"{var_name}.then((data) => {{\n"
+        local_script += f"  generate_chart(\"{canvas_id}\", data);\n"
+        local_script += f"}});\n"
+
+        generated_script += f"{var_name} = fetch(\"./{t}/{project_name}.json\").then((response) => response.json());\n"
+        generated_script += local_script + "\n"
+
+        with open(f"./{t}/{project_name}.html", 'w') as f:
+            f.write(html_template.replace("PLACE YOUR SHIT HERE", generated_canvas + f"<script src=\"{project_name}.js\"></script>"))
+
+        with open(f"./{t}/{project_name}.js", 'w') as f:
+            f.write(js_template)
+            f.write("\nconst commit = " + str(commits) + ";\n\n")
+            f.write(f"{var_name} = fetch(\"{project_name}.json\").then((response) => response.json());\n")
+            f.write(local_script)
 
         with open(f"./{t}/{project_name}.json", 'w') as f:
             json.dump(data, f, indent=4)
 
-        generated_script += f"{project_name} = fetch(\"./{t}/{project_name}.json\").then((response) => response.json());\n"
-        generated_script += f"{project_name}.then((data) => {{\n"
-        generated_script += f"  generate_chart(\"{canvas_id}\", data);\n"
-        generated_script += f"}});\n\n"
 
     return (generated_canvases, generated_script)
 
-
-with open('template.html', 'r') as f:
-    html_template = f.read()
-
-with open('template.js', 'r') as f:
-    js_template = f.read()
 
 for t in ["indexing", "inspect-code"]:
     os.makedirs(t)
