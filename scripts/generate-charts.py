@@ -45,10 +45,8 @@ def process_build(build):
                 projects[project][t].append((build, m))
 
 
-for build in sorted(os.listdir(input_dir)):
-    if build == ".git" or build == ".github" or build == "scripts":
-        continue
-
+builds = filter(lambda d: d != ".git" and d != ".github" and d != "scripts", os.listdir(input_dir)) 
+for build in sorted(builds, key=lambda x: int(x)):
     process_build(build)
 
 
