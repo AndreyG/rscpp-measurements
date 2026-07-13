@@ -91,169 +91,135 @@ Benchmark = fetch("./indexing/Benchmark.json").then((response) => response.json(
 Benchmark.then((data) => {
   generate_chart("Benchmark.chart", data);
 });
-
 CGAL = fetch("./indexing/CGAL.json").then((response) => response.json());
 CGAL.then((data) => {
   generate_chart("CGAL.chart", data);
 });
-
 CLI11 = fetch("./indexing/CLI11.json").then((response) => response.json());
 CLI11.then((data) => {
   generate_chart("CLI11.chart", data);
 });
-
 Catch2 = fetch("./indexing/Catch2.json").then((response) => response.json());
 Catch2.then((data) => {
   generate_chart("Catch2.chart", data);
 });
-
 GLM = fetch("./indexing/GLM.json").then((response) => response.json());
 GLM.then((data) => {
   generate_chart("GLM.chart", data);
 });
-
 HinnantDate = fetch("./indexing/HinnantDate.json").then((response) => response.json());
 HinnantDate.then((data) => {
   generate_chart("HinnantDate.chart", data);
 });
-
 ITK = fetch("./indexing/ITK.json").then((response) => response.json());
 ITK.then((data) => {
   generate_chart("ITK.chart", data);
 });
-
 IfcReader = fetch("./indexing/IfcReader.json").then((response) => response.json());
 IfcReader.then((data) => {
   generate_chart("IfcReader.chart", data);
 });
-
 LLVM = fetch("./indexing/LLVM.json").then((response) => response.json());
 LLVM.then((data) => {
   generate_chart("LLVM.chart", data);
 });
-
 Range_V3 = fetch("./indexing/Range-V3.json").then((response) => response.json());
 Range_V3.then((data) => {
   generate_chart("Range-V3.chart", data);
 });
-
 RapidJSON = fetch("./indexing/RapidJSON.json").then((response) => response.json());
 RapidJSON.then((data) => {
   generate_chart("RapidJSON.chart", data);
 });
-
 RecastNavigation = fetch("./indexing/RecastNavigation.json").then((response) => response.json());
 RecastNavigation.then((data) => {
   generate_chart("RecastNavigation.chart", data);
 });
-
 RigelEngine = fetch("./indexing/RigelEngine.json").then((response) => response.json());
 RigelEngine.then((data) => {
   generate_chart("RigelEngine.chart", data);
 });
-
 SEAL = fetch("./indexing/SEAL.json").then((response) => response.json());
 SEAL.then((data) => {
   generate_chart("SEAL.chart", data);
 });
-
 Sprout = fetch("./indexing/Sprout.json").then((response) => response.json());
 Sprout.then((data) => {
   generate_chart("Sprout.chart", data);
 });
-
 UnitTestCpp = fetch("./indexing/UnitTestCpp.json").then((response) => response.json());
 UnitTestCpp.then((data) => {
   generate_chart("UnitTestCpp.chart", data);
 });
-
 UnrealEngine = fetch("./indexing/UnrealEngine.json").then((response) => response.json());
 UnrealEngine.then((data) => {
   generate_chart("UnrealEngine.chart", data);
 });
-
 VTK = fetch("./indexing/VTK.json").then((response) => response.json());
 VTK.then((data) => {
   generate_chart("VTK.chart", data);
 });
-
 baseline_project = fetch("./indexing/baseline-project.json").then((response) => response.json());
 baseline_project.then((data) => {
   generate_chart("baseline-project.chart", data);
 });
-
 fmtlib = fetch("./indexing/fmtlib.json").then((response) => response.json());
 fmtlib.then((data) => {
   generate_chart("fmtlib.chart", data);
 });
-
 glslang = fetch("./indexing/glslang.json").then((response) => response.json());
 glslang.then((data) => {
   generate_chart("glslang.chart", data);
 });
-
 ninja = fetch("./indexing/ninja.json").then((response) => response.json());
 ninja.then((data) => {
   generate_chart("ninja.chart", data);
 });
-
 rocksdb = fetch("./indexing/rocksdb.json").then((response) => response.json());
 rocksdb.then((data) => {
   generate_chart("rocksdb.chart", data);
 });
-
 spdlog = fetch("./indexing/spdlog.json").then((response) => response.json());
 spdlog.then((data) => {
   generate_chart("spdlog.chart", data);
 });
-
 xgboost = fetch("./indexing/xgboost.json").then((response) => response.json());
 xgboost.then((data) => {
   generate_chart("xgboost.chart", data);
 });
-
 rpp = fetch("./indexing/rpp.json").then((response) => response.json());
 rpp.then((data) => {
   generate_chart("rpp.chart", data);
 });
-
 ReactivePlusPlus = fetch("./indexing/ReactivePlusPlus.json").then((response) => response.json());
 ReactivePlusPlus.then((data) => {
   generate_chart("ReactivePlusPlus.chart", data);
 });
-
 slang = fetch("./indexing/slang.json").then((response) => response.json());
 slang.then((data) => {
   generate_chart("slang.chart", data);
 });
-
 YourWorkbenchLib = fetch("./indexing/YourWorkbenchLib.json").then((response) => response.json());
 YourWorkbenchLib.then((data) => {
   generate_chart("YourWorkbenchLib.chart", data);
 });
-
 PhantomCoroutines = fetch("./indexing/PhantomCoroutines.json").then((response) => response.json());
 PhantomCoroutines.then((data) => {
   generate_chart("PhantomCoroutines.chart", data);
 });
-
 nlohmann_json = fetch("./indexing/nlohmann-json.json").then((response) => response.json());
 nlohmann_json.then((data) => {
   generate_chart("nlohmann-json.chart", data);
 });
-
 Eigen = fetch("./indexing/Eigen.json").then((response) => response.json());
 Eigen.then((data) => {
   generate_chart("Eigen.chart", data);
 });
-
 Taskflow = fetch("./indexing/Taskflow.json").then((response) => response.json());
 Taskflow.then((data) => {
   generate_chart("Taskflow.chart", data);
 });
-
 enchantum = fetch("./indexing/enchantum.json").then((response) => response.json());
 enchantum.then((data) => {
   generate_chart("enchantum.chart", data);
 });
-
