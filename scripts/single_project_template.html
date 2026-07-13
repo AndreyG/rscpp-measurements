@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+
+<html>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+<body onload = "prefill()">
+
+<style>
+  .report-title {
+    font-size: 3rem;
+    font-weight: 600;
+    word-break: break-word;
+    text-align: center;
+  }
+  .report-graphs {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .report-range {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    max-width: 1500px;
+    margin: 0 auto;
+  }
+  .dual-slider {
+    position: relative;
+    flex: 1 1 auto;
+    height: 20px;
+  }
+  .dual-slider-track,
+  .dual-slider-fill {
+    position: absolute;
+    top: 8px;
+    height: 4px;
+    border-radius: 2px;
+  }
+  .dual-slider-track {
+    left: 0;
+    right: 0;
+    background: #ccc;
+  }
+  .dual-slider-fill {
+    background: #4a90d9;
+  }
+  .dual-slider input[type="range"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 20px;
+    margin: 0;
+    background: transparent;
+    pointer-events: none;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  .dual-slider input[type="range"]::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    background: transparent;
+  }
+  .dual-slider input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4a90d9;
+    border: 2px solid #fff;
+    box-shadow: 0 0 2px rgba(0,0,0,.5);
+    cursor: pointer;
+  }
+  .dual-slider input[type="range"]::-moz-range-track {
+    background: transparent;
+    border: none;
+  }
+  .dual-slider input[type="range"]::-moz-range-thumb {
+    pointer-events: auto;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #4a90d9;
+    border: 2px solid #fff;
+    box-shadow: 0 0 2px rgba(0,0,0,.5);
+    cursor: pointer;
+  }
+</style>
+
+<div style="position:fixed">
+<input type="checkbox" id="yscale" value="yscale" onclick="onClick()" />
+<label for="yscale">Scale time from zero</label>
+</div>
+
+<div class="report-range">
+<span id="rangeMinLabel"></span>
+<div class="dual-slider">
+  <div class="dual-slider-track"></div>
+  <div class="dual-slider-fill" id="rangeFill"></div>
+  <input type="range" id="rangeMin" oninput="onRangeChange()" />
+  <input type="range" id="rangeMax" oninput="onRangeChange()" />
+</div>
+<span id="rangeMaxLabel"></span>
+</div>
+
+<script>
+const fromZero = 'fromZero';
+
+function onClick() {
+  var checkBox = document.getElementById('yscale');
+  window.location.replace(window.location.origin + window.location.pathname + '?yscale=' + (checkBox.checked ? fromZero : 'centered') + window.location.hash)
+}
+
+function prefill() {
+  var checkBox = document.getElementById('yscale');
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  var yscale = urlParams.get('yscale')
+  checkBox.checked = yscale == null || yscale == fromZero;
+}
+</script>
+
+PLACE YOUR SHIT HERE
+
+</body>
+</html>

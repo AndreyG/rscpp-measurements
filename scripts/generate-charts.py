@@ -72,11 +72,21 @@ def find_change_points(times, builds):
     return filtered
 
 
-with open('template.html', 'r') as f:
-    html_template = f.read()
+with open('single_project_template.html', 'r') as f:
+    single_project_html_template = f.read()
 
-with open('template.js', 'r') as f:
-    js_template = f.read()
+with open('single_project_template.js', 'r') as f:
+    single_project_js_template = f.read()
+
+
+TEMPLATE_PLACEHOLDER = "PLACE YOUR SHIT HERE"
+
+
+def generate_canvas(canvas_id):
+    canvas = "<div class=\"report-graphs\">\n"
+    canvas += f"<canvas id=\"{canvas_id}\" style=\"width:100%;max-width:1500px\"/>\n"
+    canvas += "</div>\n"
+    return canvas
 
 
 def generate(projects, t):
@@ -89,16 +99,13 @@ def generate(projects, t):
         results = data[t]
         canvas_id = project_name + ".chart"
 
-        generated_canvas = "<div class=\"report-graphs\">\n"
-        generated_canvas += f"<canvas id=\"{canvas_id}\" style=\"width:100%;max-width:1500px\"/>\n"
-        generated_canvas += "</div>\n"
-
-        generated_canvases += f"<h1 class=\"report-title\" id={project_name}><a href=\"#{project_name}\">{project_name}</a></h1>\n"
-        generated_canvases += generated_canvas + "\n"
-        generated_canvases += f"<a href=\"{t}/{project_name}.html\">Open in separate page</a>\n"
-
+        generated_canvas = generate_canvas('chart')
         generated_canvas = f"<h1 class=\"report-title\">{project_name}</h1>\n" + generated_canvas + "\n"
         generated_canvas += f"<a href=\"../{t}.html#{project_name}\">Open in all-projects view page</a>\n"
+
+        generated_canvases += f"<h1 class=\"report-title\" id={project_name}><a href=\"#{project_name}\">{project_name}</a></h1>\n"
+        generated_canvases += generate_canvas(canvas_id) + "\n"
+        generated_canvases += f"<a href=\"{t}/{project_name}.html\">Open in separate page</a>\n"
 
         builds = []
         times = []
@@ -125,22 +132,16 @@ def generate(projects, t):
 
         var_name = project_name.replace('-', '_')
 
-        local_script = ""
-        local_script = f"{var_name}.then((data) => {{\n"
-        local_script += f"  generate_chart(\"{canvas_id}\", data);\n"
-        local_script += f"}});\n"
-
         generated_script += f"{var_name} = fetch(\"./{t}/{project_name}.json\").then((response) => response.json());\n"
-        generated_script += local_script + "\n"
+        generated_script += f"{var_name}.then((data) => {{\n"
+        generated_script += f"  generate_chart(\"{canvas_id}\", data);\n"
+        generated_script += f"}});\n"
 
         with open(f"./{t}/{project_name}.html", 'w') as f:
-            f.write(html_template.replace("PLACE YOUR SHIT HERE", generated_canvas + f"<script src=\"{project_name}.js\"></script>"))
+            f.write(single_project_html_template.replace(TEMPLATE_PLACEHOLDER, generated_canvas + f"<script src=\"{project_name}.js\"></script>"))
 
         with open(f"./{t}/{project_name}.js", 'w') as f:
-            f.write(js_template)
-            f.write("\nconst commit = " + str(commits) + ";\n\n")
-            f.write(f"{var_name} = fetch(\"{project_name}.json\").then((response) => response.json());\n")
-            f.write(local_script)
+            f.write(single_project_js_template.replace(TEMPLATE_PLACEHOLDER, f"\nconst commit = {str(commits)};\n\nraw_data = fetch(\"{project_name}.json\").then((response) => response.json());\n"))
 
         with open(f"./{t}/{project_name}.json", 'w') as f:
             json.dump(data, f, indent=4)
@@ -149,12 +150,19 @@ def generate(projects, t):
     return (generated_canvases, generated_script)
 
 
+with open('template.html', 'r') as f:
+    html_template = f.read()
+
+with open('template.js', 'r') as f:
+    js_template = f.read()
+
+
 for t in ["indexing", "inspect-code"]:
     os.makedirs(t)
     generated_canvases, generated_script = generate(projects, t)
 
     with open(t + ".html", 'w') as f:
-        f.write(html_template.replace("PLACE YOUR SHIT HERE", generated_canvases + f"<script src=\"{t}.js\"></script>"))
+        f.write(html_template.replace(TEMPLATE_PLACEHOLDER, generated_canvases + f"<script src=\"{t}.js\"></script>"))
 
     with open(t + ".js", 'w') as f:
         f.write(js_template)
