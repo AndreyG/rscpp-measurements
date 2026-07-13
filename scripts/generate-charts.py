@@ -3,7 +3,9 @@ import sys
 import toml
 import json
 import smtplib
+import subprocess
 from email.mime.text import MIMEText
+from pathlib import Path
 from signal_processing_algorithms.energy_statistics import energy_statistics
 from signal_processing_algorithms.determinism import deterministic_numpy_random
 
@@ -12,6 +14,38 @@ input_dir = sys.argv[1]
 
 projects = {}
 commits = {}
+build_date = {}
+
+from pathlib import Path
+
+
+def commit_info(p):
+    p = Path(p).resolve()
+
+    cmd = [
+        "git", "log",
+        "--diff-filter=A",
+        "--follow",
+        "--format=%ad%x00%s",
+        "--date=short",
+        "--",
+        str(p),
+    ]
+
+    result = subprocess.run(
+        cmd, cwd=p.parent, capture_output=True, text=True, encoding="utf-8"
+    )
+
+    if result.returncode != 0:
+        None
+
+    output = result.stdout.strip()
+    if not output:
+        None
+
+    date, message = output.splitlines()[-1].split("\x00", 1)
+    return date, message
+
 
 def process_build(build):
     build_dir = os.path.join(input_dir, build)
@@ -20,6 +54,12 @@ def process_build(build):
         if t == "rs-commit-id.txt":
             with open(path, 'r') as f:
                 commits[build] = f.read()
+
+            ci = commit_info(path)
+            if ci:
+                date, message = ci
+                if message == "+ " + build:
+                    build_date[build] = date
 
             continue
 
@@ -140,8 +180,10 @@ def generate(projects, t):
         with open(f"./{t}/{project_name}.html", 'w') as f:
             f.write(single_project_html_template.replace(TEMPLATE_PLACEHOLDER, generated_canvas + f"<script src=\"{project_name}.js\"></script>"))
 
+        js = f"const commit = {str(commits)};\n\nconst date = {str(build_date)};\n\n"
+        js += single_project_js_template.replace(TEMPLATE_PLACEHOLDER, f"raw_data = fetch(\"{project_name}.json\").then((response) => response.json());\n")
         with open(f"./{t}/{project_name}.js", 'w') as f:
-            f.write(single_project_js_template.replace(TEMPLATE_PLACEHOLDER, f"\nconst commit = {str(commits)};\n\nraw_data = fetch(\"{project_name}.json\").then((response) => response.json());\n"))
+            f.write(js)
 
         with open(f"./{t}/{project_name}.json", 'w') as f:
             json.dump(data, f, indent=4)
